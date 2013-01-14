@@ -1,23 +1,15 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
-const double march_limit = 40; // Distance before we give up
-const double march_step = 0.0000001f; // Depth increment in each iteration
-const double march_step_broad = 0.01f;
-const double fov = 90; // Horizontal field of view
-
-#define DEGS_TO_RADS(t)		((t) / 180.0 * 3.141592654)
-#define CLAMP(t, mint, maxt)	((t) < (mint) ? (mint) : ((t) > (maxt) ? (maxt) : (t)))
-#define ABS(f)		((f) < 0 ? (f) * -1 : (f))
-#define MIN(x, y)   ((x) < (y) ? (x) : (y))
-#define MAX(x, y)   ((x) > (y) ? (x) : (y))
+#define DEGS_TO_RADS(t)		((t) / 180.0f * 3.141592654f)
+#define CLAMP(t, mint, maxt)	(t < mint ? mint : (t > maxt ? maxt : t))
 
 int save_png(char *filename, unsigned char *data, int width, int height);
 
 typedef struct vec3
 {
-    double x, y, z;
+    float x, y, z;
 } vec3;
 
 vec3 vec_add(vec3 a, vec3 b)
@@ -29,7 +21,7 @@ vec3 vec_add(vec3 a, vec3 b)
     return r;
 }
 
-vec3 vec_mult(vec3 a, double b)
+vec3 vec_mult(vec3 a, float b)
 {
     vec3 r;
     r.x = a.x * b;
@@ -38,32 +30,26 @@ vec3 vec_mult(vec3 a, double b)
     return r;
 }
 
-double vec_length_sq(vec3 a)
+float vec_length(vec3 a)
 {
-    return a.x * a.x + a.y * a.y + a.z * a.z;
-}
-
-double vec_length(vec3 a)
-{
-	return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 vec3 vec_norm(vec3 a)
 {
     vec3 r;
-    double l = vec_length(a);
+    float l = vec_length(a);
     r.x = a.x / l;
     r.y = a.y / l;
     r.z = a.z / l;
     return r;
 }
 
-void save(double **data, int width, int height, double min_depth, double max_depth)
+void save(float **data, int width, int height, float min_depth, float max_depth)
 {
 	int i, j;
+	float f;
 	unsigned char *d = malloc(width * height * sizeof(unsigned char));
-    double fog;
-
 	memset(d, 0, width * height * sizeof(unsigned char));
 	for (i = 0; i < width; i ++)
 	{
@@ -71,9 +57,8 @@ void save(double **data, int width, int height, double min_depth, double max_dep
 		{
 			if (data[i][j] >= 0)
 			{
-				fog = (CLAMP(data[i][j], min_depth, max_depth) - min_depth) / (max_depth - min_depth);
+				float fog = (CLAMP(data[i][j], min_depth, max_depth) - min_depth) / (max_depth - min_depth);
 				d[j * width + i] = (unsigned char)((1 - fog) * 255);
-				//d[j * width + i] = 255;
 			}
 		}
 	}
@@ -85,26 +70,32 @@ void save(double **data, int width, int height, double min_depth, double max_dep
 
 void go(int width, int height, int (*objectFunc)(vec3))
 {
+	const float march_limit = 40; // Distance before we give up
+	const float march_step = 0.001f; // Depth increment in each iteration
+	const float fov = 90; // Horizontal field of view
     int i;
     int x, y;
-    double **depth;
-    double march;
-    double half_fov_h = DEGS_TO_RADS(fov / 2);
-    double half_fov_v = DEGS_TO_RADS((fov / 2) * ((double)height / width));
-    double half_width = (double)width / 2;
-    double half_height = (double)height / 2;
+    float **depth;
+    float march;
+    float half_fov_h = DEGS_TO_RADS(fov / 2);
+    float half_fov_v = DEGS_TO_RADS((fov / 2) * ((float)height / width));
+    float half_width = (float)width / 2;
+    float half_height = (float)height / 2;
     vec3 camera_pos, pos, dir;
-	double min_depth = march_limit, max_depth = 0;
-    int test_result;
+	float min_depth = march_limit;
+	float max_depth = 0;
+	time_t start, end;
 
     // Init depth array
-    depth = (double **)malloc(width * sizeof(double));
+    depth = (float **)malloc(width * sizeof(float));
     for (i = 0; i < width; i ++)
-        depth[i] = (double *)malloc(height * sizeof(double));
+        depth[i] = (float *)malloc(height * sizeof(float));
 
 	camera_pos.x = 0;
 	camera_pos.y = 0;
-	camera_pos.z = -16;
+	camera_pos.z = -17;
+
+	time(&start);
         
     // Iterate over pixels
     for (x = 0; x < width; x ++)
@@ -113,32 +104,32 @@ void go(int width, int height, int (*objectFunc)(vec3))
         {
             depth[x][y] = -1;
             // Generate dir vector
-            dir.x = sin(((x - half_width) / width) * half_fov_h);
-            dir.y = sin(((y - half_height) / height) * half_fov_v);
-            dir.z = cos(((x - half_width) / width) * half_fov_h);
+            dir.x = tanf(((x - half_width) / half_width) * half_fov_h);
+            dir.y = tanf(((y - half_height) / half_height) * half_fov_v);
+            dir.z = 1;
             dir = vec_norm(dir); // necessary?
             // Ten hut!
-            march = 8; // cheat!
+            march = 7;
             while (march < march_limit)
             {
                 pos = vec_add(camera_pos, vec_mult(dir, march));
-                test_result = objectFunc(pos);
 
-                if (test_result > 0)
+                if (objectFunc(pos) >= 0)
                 {
                     depth[x][y] = march;
-                    min_depth = MIN(min_depth, march);
-                    max_depth = MAX(max_depth, march);
-                    break;
+					min_depth = march < min_depth ? march : min_depth;
+					max_depth = march > max_depth ? march : max_depth;
+					break;
                 }
-                else if (test_result < 0)
-                    march += march_step_broad;
-                else
-                    march += march_step;
+            
+                march += march_step;
             }
         }
-        printf(".");
+		printf(".");
     }
+
+	time(&end);
+	printf("\nTime taken: %.2lf\n", difftime(end, start));
 
 	save(depth, width, height, min_depth, max_depth);
 
@@ -150,7 +141,7 @@ void go(int width, int height, int (*objectFunc)(vec3))
 
 int test_object(vec3 v)
 {
-    if (v.x > -1 && v.x < 1 && v.y > -1 && v.y < 1 && v.z > -1 && v.z < 1)
+    if (v.x > -6 && v.x < 6 && v.y > -6 && v.y < 6 && v.z > -6 && v.z < 6)
         return 1;
     else
         return -1;
@@ -158,67 +149,62 @@ int test_object(vec3 v)
 
 vec3 iterate(vec3 v, vec3 c)
 {
-    double scale = 2;
-    double fixed_radius = (1 * 1);
-    double min_radius = (0.5 * 0.5);
-	double mag;
+    float m;
+    float rmin = 0.5f;
+    float rfix = 1;
+	float scale = 2;
+    
 
-    // Box folds for each component
-	if (v.x > 1)
-		v.x = scale - v.x;
-	else if (v.x < -1)
-		v.x = -scale - v.x;
-
-	if (v.y > 1)
-		v.y = scale - v.y;
-	else if (v.y < -1)
-		v.y = -scale - v.y;
-
-	if (v.z > 1)
-		v.z = scale - v.z;
-	else if (v.z < -1)
-		v.z = -scale - v.z;
-
+    // Box fold
+    if (v.x > 1)
+        v.x = 2 - v.x;
+    else if (v.x < -1)
+        v.x = -2 - v.x;
+        
+    if (v.y > 1)
+        v.y = 2 - v.y;
+    else if (v.y < -1)
+        v.y = -2 - v.y;
+        
+    if (v.z > 1)
+        v.z = 2 - v.z;
+    else if (v.z < -1)
+        v.z = -2 - v.z;
+        
     // Sphere fold
-	mag = vec_length(v);
-	if (mag < min_radius)
-		v = vec_mult(v, (fixed_radius * fixed_radius) / (min_radius * min_radius));
-	else if (mag < fixed_radius) 
-		v = vec_mult(v, (fixed_radius * fixed_radius) / (mag * mag));
-
+    m = vec_length(v);
+    if (m < 0.5)
+        v = vec_mult(v, 4);
+    else if (m < 1)
+        v = vec_mult(v, (1.f / (m * m)));
+    
     v = vec_mult(v, scale);
     v = vec_add(v, c);
-
-	return v;
+    
+    return v;
 }
 
-int mandelbox(vec3 c)
+int inside(vec3 c)
 {
-    int attempts;
-    int attempt_limit = 1000;
-    double bounds = 2;
-    vec3 p;
-    double spacing = bounds + march_step_broad + march_step;
-
-    if (ABS(c.x) > spacing || ABS(c.y) > spacing || ABS(c.z) > spacing)
-        return -1;
-
-	p.x = c.x;
-    p.y = c.y;
-    p.z = c.z;
-	for (attempts = 0; attempts < attempt_limit; attempts ++)
-	{
-		p = iterate(p, c);
-		//if (vec_length_sq(p) > 121)
-        if (ABS(p.x) > spacing || ABS(p.y) > spacing || ABS(p.z) > spacing)
-			return 0;
-	}
-
+    int bailout_limit = 10;
+    int i;
+    vec3 v;
+    
+    v = c;
+    for (i = 0; i < bailout_limit; i ++)
+    {
+        v = iterate(v, c);
+        
+		if (vec_length(v) > 20)
+            return -1;
+    }
+    
     return 1;
 }
 
+
 int main(int argc, char **argv)
 {
-    //go(120, 90, &test_object);
-    go(240, 180, &mandelbox);
+    //go(480, 360, &test_object);
+	go(1024, 768, &inside);
 }
