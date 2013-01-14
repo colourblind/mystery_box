@@ -70,8 +70,8 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 
 void go(int width, int height, int (*objectFunc)(vec3))
 {
-	const float march_limit = 40; // Distance before we give up
-	const float march_step = 0.001f; // Depth increment in each iteration
+	const float march_limit = 25; // Distance before we give up
+	const float march_step = 0.0005f; // Depth increment in each iteration
 	const float fov = 90; // Horizontal field of view
     int i;
     int x, y;
@@ -109,11 +109,10 @@ void go(int width, int height, int (*objectFunc)(vec3))
             dir.z = 1;
             dir = vec_norm(dir); // necessary?
             // Ten hut!
-            march = 7;
+            march = 10;
             while (march < march_limit)
             {
                 pos = vec_add(camera_pos, vec_mult(dir, march));
-
                 if (objectFunc(pos) >= 0)
                 {
                     depth[x][y] = march;
@@ -205,6 +204,8 @@ int inside(vec3 c)
 
 int main(int argc, char **argv)
 {
-    //go(480, 360, &test_object);
-	go(1024, 768, &inside);
+    int width = argc < 2 ? 480 : atoi(argv[1]);
+    int height = argc < 3 ? 360 : atoi(argv[2]);
+
+	go(width, height, &inside);
 }
