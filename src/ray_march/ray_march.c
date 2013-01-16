@@ -68,28 +68,44 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 	free(d);
 }
 
-void go(int width, int height, int (*objectFunc)(vec3))
+float march(vec3 start, vec3 dir, int(*objectFunc)(vec3))
 {
 	const float march_limit = 25; // Distance before we give up
 	const float march_step = 0.0005f; // Depth increment in each iteration
+    float march = 10;
+    vec3 pos;
+
+    while (march < march_limit)
+    {
+        pos = vec_add(start, vec_mult(dir, march));
+        if (objectFunc(pos) >= 0)
+            return march;
+    
+        march += march_step;
+    }
+
+    return -1;
+}
+
+void go(int width, int height, int (*objectFunc)(vec3))
+{
 	const float fov = 90; // Horizontal field of view
-    int i;
     int x, y;
     float **depth;
-    float march;
     float half_fov_h = DEGS_TO_RADS(fov / 2);
     float half_fov_v = DEGS_TO_RADS((fov / 2) * ((float)height / width));
     float half_width = (float)width / 2;
     float half_height = (float)height / 2;
-    vec3 camera_pos, pos, dir;
-	float min_depth = march_limit;
+    vec3 camera_pos, dir;
+	float min_depth = 100000000;
 	float max_depth = 0;
+    float result;
 	time_t start, end;
 
     // Init depth array
     depth = (float **)malloc(width * sizeof(float));
-    for (i = 0; i < width; i ++)
-        depth[i] = (float *)malloc(height * sizeof(float));
+    for (x = 0; x < width; x ++)
+        depth[x] = (float *)malloc(height * sizeof(float));
 
 	camera_pos.x = 0;
 	camera_pos.y = 0;
@@ -109,19 +125,12 @@ void go(int width, int height, int (*objectFunc)(vec3))
             dir.z = 1;
             dir = vec_norm(dir); // necessary?
             // Ten hut!
-            march = 10;
-            while (march < march_limit)
+            result = march(camera_pos, dir, objectFunc);
+            if (result > 0)
             {
-                pos = vec_add(camera_pos, vec_mult(dir, march));
-                if (objectFunc(pos) >= 0)
-                {
-                    depth[x][y] = march;
-					min_depth = march < min_depth ? march : min_depth;
-					max_depth = march > max_depth ? march : max_depth;
-					break;
-                }
-            
-                march += march_step;
+			    min_depth = result < min_depth ? result : min_depth;
+			    max_depth = result > max_depth ? result : max_depth;
+                depth[x][y] = result;
             }
         }
 		printf(".");
@@ -133,8 +142,8 @@ void go(int width, int height, int (*objectFunc)(vec3))
 	save(depth, width, height, min_depth, max_depth);
 
     // Tear down array
-    for (i = 0; i < width; i++)
-        free(depth[i]);
+    for (x = 0; x < width; x++)
+        free(depth[x]);
     free(depth);
 }
 
@@ -183,9 +192,9 @@ vec3 iterate(vec3 v, vec3 c)
     return v;
 }
 
-int inside(vec3 c)
+int inside(vec3 c, float *march)
 {
-    int bailout_limit = 10;
+    int bailout_limit = 15;
     int i;
     vec3 v;
     
