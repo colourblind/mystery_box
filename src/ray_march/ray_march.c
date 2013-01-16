@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -45,12 +46,17 @@ vec3 vec_norm(vec3 a)
     return r;
 }
 
+float absf(float a)
+{
+    return a < 0 ? -a : a;
+}
+
 void save(float **data, int width, int height, float min_depth, float max_depth)
 {
 	int i, j;
-	float f;
 	unsigned char *d = malloc(width * height * sizeof(unsigned char));
-	memset(d, 0, width * height * sizeof(unsigned char));
+
+    memset(d, 0, width * height * sizeof(unsigned char));
 	for (i = 0; i < width; i ++)
 	{
 		for (j = 0; j < height; j ++)
@@ -68,26 +74,29 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 	free(d);
 }
 
-float march(vec3 start, vec3 dir, int(*objectFunc)(vec3))
+float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 {
-	const float march_limit = 25; // Distance before we give up
-	const float march_step = 0.0005f; // Depth increment in each iteration
-    float march = 10;
+    const int MAX_STEPS = 400;
+    const float MIN_DISTANCE = 0.0001f;
+    int step;
+    float march = 0, distance;
     vec3 pos;
 
-    while (march < march_limit)
+    for (step = 0; step < MAX_STEPS; step ++)
     {
         pos = vec_add(start, vec_mult(dir, march));
-        if (objectFunc(pos) >= 0)
+
+        distance = objectFunc(pos);
+        if (distance < MIN_DISTANCE)
             return march;
     
-        march += march_step;
+        march += distance;
     }
 
     return -1;
 }
 
-void go(int width, int height, int (*objectFunc)(vec3))
+void go(int width, int height, float (*objectFunc)(vec3))
 {
 	const float fov = 90; // Horizontal field of view
     int x, y;
@@ -155,7 +164,7 @@ int test_object(vec3 v)
         return -1;
 }
 
-vec3 iterate(vec3 v, vec3 c)
+vec3 iterate(vec3 v, vec3 c, float *dz)
 {
     float m;
     float rmin = 0.5f;
@@ -182,34 +191,37 @@ vec3 iterate(vec3 v, vec3 c)
     // Sphere fold
     m = vec_length(v);
     if (m < 0.5)
+    {
         v = vec_mult(v, 4);
+        (*dz) *= 4;
+    }
     else if (m < 1)
+    {
         v = vec_mult(v, (1.f / (m * m)));
+        (*dz) *= 1.f / (m * m);
+    }
     
     v = vec_mult(v, scale);
     v = vec_add(v, c);
     
+    (*dz) = (*dz) * absf(scale) + 1.f;
+            
     return v;
 }
 
-int inside(vec3 c, float *march)
+float inside(vec3 c)
 {
     int bailout_limit = 15;
     int i;
     vec3 v;
+    float dr = 1.f;
     
     v = c;
     for (i = 0; i < bailout_limit; i ++)
-    {
-        v = iterate(v, c);
-        
-		if (vec_length(v) > 20)
-            return -1;
-    }
+        v = iterate(v, c, &dr);
     
-    return 1;
+    return vec_length(v) / absf(dr);
 }
-
 
 int main(int argc, char **argv)
 {
