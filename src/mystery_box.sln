@@ -1,10 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mystery_box", "mystery_box.vcproj", "{0C7214CE-55F7-4ACF-810B-AC0124379B01}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Renderer", "Renderer\Renderer.vcproj", "{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ray_march", "ray_march\ray_march.vcproj", "{072EAC61-D9A7-44AD-86FF-06ADC99C6096}"
 EndProject
 Global
@@ -17,30 +13,6 @@ Global
 		ScreensaverReleaseXP|Win32 = ScreensaverReleaseXP|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.Debug|Win32.Build.0 = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.Release|Win32.ActiveCfg = Release|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.Release|Win32.Build.0 = Release|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverDebug|Win32.ActiveCfg = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverDebug|Win32.Build.0 = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverDebugXP|Win32.ActiveCfg = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverDebugXP|Win32.Build.0 = Debug|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverRelease|Win32.ActiveCfg = Release|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverRelease|Win32.Build.0 = Release|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverReleaseXP|Win32.ActiveCfg = Release|Win32
-		{0C7214CE-55F7-4ACF-810B-AC0124379B01}.ScreensaverReleaseXP|Win32.Build.0 = Release|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.Debug|Win32.Build.0 = Debug|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.Release|Win32.ActiveCfg = Release|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.Release|Win32.Build.0 = Release|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverDebug|Win32.ActiveCfg = ScreensaverDebug|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverDebug|Win32.Build.0 = ScreensaverDebug|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverDebugXP|Win32.ActiveCfg = ScreensaverDebugXP|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverDebugXP|Win32.Build.0 = ScreensaverDebugXP|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverRelease|Win32.ActiveCfg = ScreensaverRelease|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverRelease|Win32.Build.0 = ScreensaverRelease|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverReleaseXP|Win32.ActiveCfg = ScreensaverReleaseXP|Win32
-		{E3BB7E6E-71CE-444F-9E39-D7AF309751F0}.ScreensaverReleaseXP|Win32.Build.0 = ScreensaverReleaseXP|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug|Win32.ActiveCfg = Debug|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug|Win32.Build.0 = Debug|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Release|Win32.ActiveCfg = Release|Win32
