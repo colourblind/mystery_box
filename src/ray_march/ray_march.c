@@ -34,14 +34,13 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 
 float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 {
-    const int MAX_STEPS = 400;
     const float MIN_DISTANCE = 0.0005f;
-    const float MAX_DISTANCE = 30;
+    const float MAX_DISTANCE = 30; // TODO: dynamic, based on camera position
     int step;
     float march = 0, distance;
     vec3 pos;
 
-    for (step = 0; step < MAX_STEPS; step ++)
+    while(1)
     {
         pos = vec_add(start, vec_mult(dir, march));
 
@@ -77,9 +76,9 @@ void go(int width, int height, float (*objectFunc)(vec3))
     for (x = 0; x < width; x ++)
         depth[x] = (float *)malloc(height * sizeof(float));
 
-	camera_pos.x = 17;
-	camera_pos.y = -17;
-	camera_pos.z = 17;
+	camera_pos.x = 15;
+	camera_pos.y = 4;
+	camera_pos.z = 15;
 
     // Where (0, 0, 0) is our target
     camera_dir.x = 0 - camera_pos.x;
