@@ -2,54 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "vector.h"
 
 #define DEGS_TO_RADS(t)		((t) / 180.0f * 3.141592654f)
 #define CLAMP(t, mint, maxt)	(t < mint ? mint : (t > maxt ? maxt : t))
 
 int save_png(char *filename, unsigned char *data, int width, int height);
-
-typedef struct vec3
-{
-    float x, y, z;
-} vec3;
-
-vec3 vec_add(vec3 a, vec3 b)
-{
-    vec3 r;
-    r.x = a.x + b.x;
-    r.y = a.y + b.y;
-    r.z = a.z + b.z;
-    return r;
-}
-
-vec3 vec_mult(vec3 a, float b)
-{
-    vec3 r;
-    r.x = a.x * b;
-    r.y = a.y * b;
-    r.z = a.z * b;
-    return r;
-}
-
-float vec_length(vec3 a)
-{
-	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
-}
-
-vec3 vec_norm(vec3 a)
-{
-    vec3 r;
-    float l = vec_length(a);
-    r.x = a.x / l;
-    r.y = a.y / l;
-    r.z = a.z / l;
-    return r;
-}
-
-float absf(float a)
-{
-    return a < 0 ? -a : a;
-}
 
 void save(float **data, int width, int height, float min_depth, float max_depth)
 {
@@ -159,14 +117,6 @@ void go(int width, int height, float (*objectFunc)(vec3))
     free(depth);
 }
 
-int test_object(vec3 v)
-{
-    if (v.x > -6 && v.x < 6 && v.y > -6 && v.y < 6 && v.z > -6 && v.z < 6)
-        return 1;
-    else
-        return -1;
-}
-
 vec3 iterate(vec3 v, vec3 c, float *dz)
 {
     float m;
@@ -214,7 +164,9 @@ vec3 iterate(vec3 v, vec3 c, float *dz)
 
 float inside(vec3 c)
 {
-    int bailout_limit = 15;
+    const int bailout_limit = 15;
+    const float bounding_volume_radius = 11;
+    float lolwut = powf(2.f, 1 - bailout_limit);
     int i;
     vec3 v;
     float dr = 1.f;
@@ -223,7 +175,8 @@ float inside(vec3 c)
     for (i = 0; i < bailout_limit; i ++)
         v = iterate(v, c, &dr);
     
-    return vec_length(v) / absf(dr);
+    return vec_length(v) / absf(dr) - lolwut;
+    //return (vec_length(v) - bounding_volume_radius) / absf(dr);
 }
 
 int main(int argc, char **argv)
