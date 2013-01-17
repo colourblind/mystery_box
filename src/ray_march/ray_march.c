@@ -77,7 +77,8 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 {
     const int MAX_STEPS = 400;
-    const float MIN_DISTANCE = 0.0001f;
+    const float MIN_DISTANCE = 0.0005f;
+    const float MAX_DISTANCE = 30;
     int step;
     float march = 0, distance;
     vec3 pos;
@@ -89,6 +90,8 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
         distance = objectFunc(pos);
         if (distance < MIN_DISTANCE)
             return march;
+        if (march > MAX_DISTANCE)
+            break;
     
         march += distance;
     }
