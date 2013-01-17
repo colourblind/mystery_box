@@ -66,7 +66,7 @@ void go(int width, int height, float (*objectFunc)(vec3))
     float half_fov_v = DEGS_TO_RADS((fov / 2) * ((float)height / width));
     float half_width = (float)width / 2;
     float half_height = (float)height / 2;
-    vec3 camera_pos, dir;
+    vec3 camera_pos, camera_dir, ray_dir;
 	float min_depth = 100000000;
 	float max_depth = 0;
     float result;
@@ -77,9 +77,16 @@ void go(int width, int height, float (*objectFunc)(vec3))
     for (x = 0; x < width; x ++)
         depth[x] = (float *)malloc(height * sizeof(float));
 
-	camera_pos.x = 0;
-	camera_pos.y = 0;
-	camera_pos.z = -17;
+	camera_pos.x = 17;
+	camera_pos.y = -17;
+	camera_pos.z = 17;
+
+    // Where (0, 0, 0) is our target
+    camera_dir.x = 0 - camera_pos.x;
+    camera_dir.y = 0 - camera_pos.y;
+    camera_dir.z = 0 - camera_pos.z;
+
+    camera_dir = vec_norm(camera_dir);
 
 	time(&start);
         
@@ -90,12 +97,12 @@ void go(int width, int height, float (*objectFunc)(vec3))
         {
             depth[x][y] = -1;
             // Generate dir vector
-            dir.x = tanf(((x - half_width) / half_width) * half_fov_h);
-            dir.y = tanf(((y - half_height) / half_height) * half_fov_v);
-            dir.z = 1;
-            dir = vec_norm(dir); // necessary?
+            ray_dir.x = tanf(((x - half_width) / half_width) * half_fov_h);
+            ray_dir.y = tanf(((y - half_height) / half_height) * half_fov_v);
+            ray_dir.z = 1;
+            ray_dir = vec_norm(vec_rotate(ray_dir, camera_dir));
             // Ten hut!
-            result = march(camera_pos, dir, objectFunc);
+            result = march(camera_pos, ray_dir, objectFunc);
             if (result > 0)
             {
 			    min_depth = result < min_depth ? result : min_depth;
@@ -181,8 +188,8 @@ float inside(vec3 c)
 
 int main(int argc, char **argv)
 {
-    int width = argc < 2 ? 480 : atoi(argv[1]);
-    int height = argc < 3 ? 360 : atoi(argv[2]);
+    int width = argc < 2 ? 320 : atoi(argv[1]);
+    int height = argc < 3 ? 240 : atoi(argv[2]);
 
 	go(width, height, &inside);
 }
