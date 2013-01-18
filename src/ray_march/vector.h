@@ -12,6 +12,24 @@ vec3 vec_add(vec3 a, vec3 b)
     return r;
 }
 
+vec3 vec_add_c(vec3 a, float x, float y, float z)
+{
+    vec3 r;
+    r.x = a.x + x;
+    r.y = a.y + y;
+    r.z = a.z + z;
+    return r;
+}
+
+vec3 vec_sub(vec3 a, vec3 b)
+{
+    vec3 r;
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    r.z = a.z - b.z;
+    return r;
+}
+
 vec3 vec_mult(vec3 a, float b)
 {
     vec3 r;
@@ -23,7 +41,11 @@ vec3 vec_mult(vec3 a, float b)
 
 float vec_length(vec3 a)
 {
-	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
+    float x = a.x * a.x;
+    float y = a.y * a.y;
+    float z = a.z * a.z;
+    float wtf = x + y + z;
+	return sqrtf(wtf);
 }
 
 vec3 vec_norm(vec3 a)
