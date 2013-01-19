@@ -33,33 +33,6 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 	free(d);
 }
 
-
-float colour(vec3 position, float (*objectFunc)(vec3))
-{
-    const float TAP_OFFSET = 0.025f;
-
-    float x0 = objectFunc(vec_add_c(position, -TAP_OFFSET, 0, 0));
-    float x1 = objectFunc(vec_add_c(position, TAP_OFFSET, 0, 0));
-    float y0 = objectFunc(vec_add_c(position, 0, -TAP_OFFSET, 0));
-    float y1 = objectFunc(vec_add_c(position, 0, TAP_OFFSET, 0));
-    float z0 = objectFunc(vec_add_c(position, 0, 0, -TAP_OFFSET));
-    float z1 = objectFunc(vec_add_c(position, 0, 0, TAP_OFFSET));
-    
-    vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
-    vec3 light = { 9, 3, 2 };
-
-    float diffuse;
-
-    normal = vec_norm(normal);
-    light = vec_norm(vec_sub(light, position));
-
-    diffuse = vec_dot(normal, light);
-
-    return CLAMP(diffuse, 0, 1) * 0.8f + 0.2f;
-    //return distance;
-}
-
-
 float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 {
     const float MIN_DISTANCE = 0.0005f;
@@ -74,7 +47,7 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 
         distance = objectFunc(pos);
         if (distance < MIN_DISTANCE)
-            return colour(pos, objectFunc);
+            return march;
         if (march > MAX_DISTANCE)
             break;
     
@@ -82,6 +55,35 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
     }
 
     return -1;
+}
+
+float colour(vec3 position, float (*objectFunc)(vec3))
+{
+    const float TAP_OFFSET = 0.025f;
+    const float ambient = 0.0f;
+    vec3 light_pos = { 9, 3, 2 };
+    vec3 light_dir = vec_norm(vec_sub(light_pos, position));
+    float diffuse = 0;
+
+    // March a ray back towards the light, and do diffuse calculation
+    // if we get there. We shim the shadow ray slightly so it doesn't
+    // get 'caught' in the volume
+    if (march(vec_add(position, vec_mult(light_dir, 0.01f)), vec_mult(light_dir, 1), objectFunc) < 0)
+    {
+        float x0 = objectFunc(vec_add_c(position, -TAP_OFFSET, 0, 0));
+        float x1 = objectFunc(vec_add_c(position, TAP_OFFSET, 0, 0));
+        float y0 = objectFunc(vec_add_c(position, 0, -TAP_OFFSET, 0));
+        float y1 = objectFunc(vec_add_c(position, 0, TAP_OFFSET, 0));
+        float z0 = objectFunc(vec_add_c(position, 0, 0, -TAP_OFFSET));
+        float z1 = objectFunc(vec_add_c(position, 0, 0, TAP_OFFSET));
+        
+        vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
+
+        normal = vec_norm(normal);
+        diffuse = vec_dot(normal, light_dir);
+    }
+
+    return CLAMP(diffuse, 0, 1) * (1 - ambient) + ambient;
 }
 
 void go(int width, int height, float (*objectFunc)(vec3))
@@ -134,7 +136,7 @@ void go(int width, int height, float (*objectFunc)(vec3))
             {
 			    min_depth = result < min_depth ? result : min_depth;
 			    max_depth = result > max_depth ? result : max_depth;
-                depth[x][y] = result;
+                depth[x][y] = colour(vec_add(camera_pos, vec_mult(ray_dir, result)), objectFunc);
             }
         }
 		printf(".");
