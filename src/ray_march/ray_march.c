@@ -60,30 +60,36 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
 float colour(vec3 position, float (*objectFunc)(vec3))
 {
     const float TAP_OFFSET = 0.025f;
-    const float ambient = 0.0f;
+    const float ambient_scale = 0.1f;
     vec3 light_pos = { 9, 3, 2 };
     vec3 light_dir = vec_norm(vec_sub(light_pos, position));
-    float diffuse = 0;
+    vec3 ao_sample_pos;
+    float diffuse = 0, ambient;
+
+    float x0 = objectFunc(vec_add_c(position, -TAP_OFFSET, 0, 0));
+    float x1 = objectFunc(vec_add_c(position, TAP_OFFSET, 0, 0));
+    float y0 = objectFunc(vec_add_c(position, 0, -TAP_OFFSET, 0));
+    float y1 = objectFunc(vec_add_c(position, 0, TAP_OFFSET, 0));
+    float z0 = objectFunc(vec_add_c(position, 0, 0, -TAP_OFFSET));
+    float z1 = objectFunc(vec_add_c(position, 0, 0, TAP_OFFSET));
+    
+    vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
+
+    normal = vec_norm(normal);
 
     // March a ray back towards the light, and do diffuse calculation
     // if we get there. We shim the shadow ray slightly so it doesn't
     // get 'caught' in the volume
     if (march(vec_add(position, vec_mult(light_dir, 0.01f)), vec_mult(light_dir, 1), objectFunc) < 0)
-    {
-        float x0 = objectFunc(vec_add_c(position, -TAP_OFFSET, 0, 0));
-        float x1 = objectFunc(vec_add_c(position, TAP_OFFSET, 0, 0));
-        float y0 = objectFunc(vec_add_c(position, 0, -TAP_OFFSET, 0));
-        float y1 = objectFunc(vec_add_c(position, 0, TAP_OFFSET, 0));
-        float z0 = objectFunc(vec_add_c(position, 0, 0, -TAP_OFFSET));
-        float z1 = objectFunc(vec_add_c(position, 0, 0, TAP_OFFSET));
-        
-        vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
+        diffuse = CLAMP(vec_dot(normal, light_dir), 0, 1);
 
-        normal = vec_norm(normal);
-        diffuse = vec_dot(normal, light_dir);
-    }
+    // For ambient occlusion, we back up slightly and check the DE
+    // result from there.
+    ao_sample_pos = vec_add(position, vec_mult(normal, 0.025f));
+    ambient = objectFunc(ao_sample_pos);
+    ambient = CLAMP(ambient * 150, 0, 1);
 
-    return CLAMP(diffuse, 0, 1) * (1 - ambient) + ambient;
+    return diffuse * (1 - ambient_scale) + ambient * ambient_scale;
 }
 
 void go(int width, int height, float (*objectFunc)(vec3))
