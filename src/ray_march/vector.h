@@ -1,3 +1,6 @@
+#ifndef MYSTERYBOX_VECTOR_H
+#define MYSTERYBOX_VECTOR_H
+
 typedef struct
 {
     float x, y, z;
@@ -14,3 +17,5 @@ vec3 vec_cross(vec3 a, vec3 b);
 vec3 vec_rotate(vec3 a, vec3 forward);
 
 float absf(float a);
+
+#endif // MYSTERYBOX_VECTOR_H

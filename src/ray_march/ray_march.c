@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include "vector.h"
+#include "config.h"
 
 #define DEGS_TO_RADS(t)		((t) / 180.0f * 3.141592654f)
 #define CLAMP(t, mint, maxt)	(t < mint ? mint : (t > maxt ? maxt : t))
@@ -21,8 +22,6 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 		{
 			if (data[i][j] >= 0)
 			{
-				//float fog = (CLAMP(data[i][j], min_depth, max_depth) - min_depth) / (max_depth - min_depth);
-				//d[j * width + i] = (unsigned char)((1 - fog) * 255);
                 d[j * width + i] = (unsigned char)(data[i][j] * 255);
 			}
 		}
@@ -33,11 +32,10 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 	free(d);
 }
 
-float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
+float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
 {
     const float MIN_DISTANCE = 0.0005f;
     const float MAX_DISTANCE = 30; // TODO: dynamic, based on camera position
-    int step;
     float march = 0, distance;
     vec3 pos;
 
@@ -45,7 +43,7 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
     {
         pos = vec_add(start, vec_mult(dir, march));
 
-        distance = objectFunc(pos);
+        distance = objectFunc(c, pos);
         if (distance < MIN_DISTANCE)
             return march;
         if (march > MAX_DISTANCE)
@@ -57,7 +55,7 @@ float march(vec3 start, vec3 dir, float (*objectFunc)(vec3))
     return -1;
 }
 
-float colour(vec3 position, float (*objectFunc)(vec3))
+float colour(config c, vec3 position, float (*objectFunc)(config, vec3))
 {
     const float TAP_OFFSET = 0.025f;
     const float ambient_scale = 0.1f;
@@ -66,12 +64,12 @@ float colour(vec3 position, float (*objectFunc)(vec3))
     vec3 ao_sample_pos;
     float diffuse = 0, ambient;
 
-    float x0 = objectFunc(vec_add_c(position, -TAP_OFFSET, 0, 0));
-    float x1 = objectFunc(vec_add_c(position, TAP_OFFSET, 0, 0));
-    float y0 = objectFunc(vec_add_c(position, 0, -TAP_OFFSET, 0));
-    float y1 = objectFunc(vec_add_c(position, 0, TAP_OFFSET, 0));
-    float z0 = objectFunc(vec_add_c(position, 0, 0, -TAP_OFFSET));
-    float z1 = objectFunc(vec_add_c(position, 0, 0, TAP_OFFSET));
+    float x0 = objectFunc(c, vec_add_c(position, -TAP_OFFSET, 0, 0));
+    float x1 = objectFunc(c, vec_add_c(position, TAP_OFFSET, 0, 0));
+    float y0 = objectFunc(c, vec_add_c(position, 0, -TAP_OFFSET, 0));
+    float y1 = objectFunc(c, vec_add_c(position, 0, TAP_OFFSET, 0));
+    float z0 = objectFunc(c, vec_add_c(position, 0, 0, -TAP_OFFSET));
+    float z1 = objectFunc(c, vec_add_c(position, 0, 0, TAP_OFFSET));
     
     vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
 
@@ -80,55 +78,45 @@ float colour(vec3 position, float (*objectFunc)(vec3))
     // March a ray back towards the light, and do diffuse calculation
     // if we get there. We shim the shadow ray slightly so it doesn't
     // get 'caught' in the volume
-    if (march(vec_add(position, vec_mult(light_dir, 0.01f)), vec_mult(light_dir, 1), objectFunc) < 0)
+    if (march(c, vec_add(position, vec_mult(light_dir, 0.01f)), vec_mult(light_dir, 1), objectFunc) < 0)
         diffuse = CLAMP(vec_dot(normal, light_dir), 0, 1);
 
     // For ambient occlusion, we back up slightly and check the DE
     // result from there.
     ao_sample_pos = vec_add(position, vec_mult(normal, 0.025f));
-    ambient = objectFunc(ao_sample_pos);
+    ambient = objectFunc(c, ao_sample_pos);
     ambient = CLAMP(ambient * 150, 0, 1);
 
     return diffuse * (1 - ambient_scale) + ambient * ambient_scale;
 }
 
-void go(int width, int height, float (*objectFunc)(vec3))
+void go(config c, float (*objectFunc)(config c, vec3))
 {
-	const float fov = 90; // Horizontal field of view
     int x, y;
     float **depth;
-    float half_fov_h = DEGS_TO_RADS(fov / 2);
-    float half_fov_v = DEGS_TO_RADS((fov / 2) * ((float)height / width));
-    float half_width = (float)width / 2;
-    float half_height = (float)height / 2;
-    vec3 camera_pos, camera_dir, ray_dir;
+    float half_fov_h = DEGS_TO_RADS(c.fov / 2);
+    float half_fov_v = DEGS_TO_RADS((c.fov / 2) * ((float)c.height / c.width));
+    float half_width = (float)c.width / 2;
+    float half_height = (float)c.height / 2;
+    vec3 camera_dir, ray_dir;
 	float min_depth = 100000000;
 	float max_depth = 0;
     float result;
 	time_t start, end;
 
     // Init depth array
-    depth = (float **)malloc(width * sizeof(float));
-    for (x = 0; x < width; x ++)
-        depth[x] = (float *)malloc(height * sizeof(float));
+    depth = (float **)malloc(c.width * sizeof(float));
+    for (x = 0; x < c.width; x ++)
+        depth[x] = (float *)malloc(c.height * sizeof(float));
 
-	camera_pos.x = 15;
-	camera_pos.y = 4;
-	camera_pos.z = 15;
-
-    // Where (0, 0, 0) is our target
-    camera_dir.x = 0 - camera_pos.x;
-    camera_dir.y = 0 - camera_pos.y;
-    camera_dir.z = 0 - camera_pos.z;
-
-    camera_dir = vec_norm(camera_dir);
+    camera_dir = vec_norm(vec_sub(c.camera_target, c.camera_pos));
 
 	time(&start);
         
     // Iterate over pixels
-    for (x = 0; x < width; x ++)
+    for (x = 0; x < c.width; x ++)
     {
-        for (y = 0; y < height; y ++)
+        for (y = 0; y < c.height; y ++)
         {
             depth[x][y] = -1;
             // Generate dir vector
@@ -137,12 +125,12 @@ void go(int width, int height, float (*objectFunc)(vec3))
             ray_dir.z = 1;
             ray_dir = vec_norm(vec_rotate(ray_dir, camera_dir));
             // Ten hut!
-            result = march(camera_pos, ray_dir, objectFunc);
+            result = march(c, c.camera_pos, ray_dir, objectFunc);
             if (result > 0)
             {
 			    min_depth = result < min_depth ? result : min_depth;
 			    max_depth = result > max_depth ? result : max_depth;
-                depth[x][y] = colour(vec_add(camera_pos, vec_mult(ray_dir, result)), objectFunc);
+                depth[x][y] = colour(c, vec_add(c.camera_pos, vec_mult(ray_dir, result)), objectFunc);
             }
         }
 		printf(".");
@@ -151,20 +139,19 @@ void go(int width, int height, float (*objectFunc)(vec3))
 	time(&end);
 	printf("\nTime taken: %.2lf\n", difftime(end, start));
 
-	save(depth, width, height, min_depth, max_depth);
+	save(depth, c.width, c.height, min_depth, max_depth);
 
     // Tear down array
-    for (x = 0; x < width; x++)
+    for (x = 0; x < c.width; x++)
         free(depth[x]);
     free(depth);
 }
 
-vec3 iterate(vec3 v, vec3 c, float *dz)
+vec3 iterate(config c, vec3 v, vec3 z, float *dz)
 {
     float m;
     float rmin = 0.5f;
     float rfix = 1;
-	float scale = 2;
     
 
     // Box fold
@@ -196,35 +183,47 @@ vec3 iterate(vec3 v, vec3 c, float *dz)
         (*dz) *= 1.f / (m * m);
     }
     
-    v = vec_mult(v, scale);
-    v = vec_add(v, c);
+    v = vec_mult(v, c.scale);
+    v = vec_add(v, z);
     
-    (*dz) = (*dz) * absf(scale) + 1.f;
+    (*dz) = (*dz) * absf(c.scale) + 1.f;
             
     return v;
 }
 
-float inside(vec3 c)
+float inside(config c, vec3 z)
 {
-    const int bailout_limit = 15;
-    const float bounding_volume_radius = 11;
-    float lolwut = powf(2.f, 1 - bailout_limit);
+    float lolwut = powf(2.f, 1 - c.bailout);
     int i;
     vec3 v;
     float dr = 1.f;
     
-    v = c;
-    for (i = 0; i < bailout_limit; i ++)
-        v = iterate(v, c, &dr);
+    v = z;
+    for (i = 0; i < c.bailout; i ++)
+        v = iterate(c, v, z, &dr);
     
     return vec_length(v) / absf(dr) - lolwut;
-    //return (vec_length(v) - bounding_volume_radius) / absf(dr);
 }
 
 int main(int argc, char **argv)
 {
-    int width = argc < 2 ? 320 : atoi(argv[1]);
-    int height = argc < 3 ? 240 : atoi(argv[2]);
+    config c;
+    c.bailout = 15;
+    c.camera_pos.x = 15;
+    c.camera_pos.y = 3;
+    c.camera_pos.z = 15;
+    c.camera_target.x = 0;
+    c.camera_target.y = 0;
+    c.camera_target.z = 0;
+    c.fov = 90;
+    c.height = 480;
+    c.scale = 2;
+    c.width = 640;
 
-	go(width, height, &inside);
+    if (argc > 1)
+        load_config(argv[1], &c);
+    c.width = argc > 2 ? atoi(argv[2]) : c.width;
+    c.height = argc > 3 ? atoi(argv[3]) : c.height;
+
+	go(c, &inside);
 }
