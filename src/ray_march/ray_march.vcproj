@@ -187,6 +187,10 @@
 				RelativePath=".\save_png.c"
 				>
 			</File>
+			<File
+				RelativePath=".\vector.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
