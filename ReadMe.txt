@@ -1,9 +1,9 @@
 A volume ray-marcher for rendering Mandelboxen.
 
-ray_march [WIDTH] [HEIGHT]
+ray_march [CONFIG_FILE] [WIDTH] [HEIGHT]
 
-Currently all of the other parameters are hard-coded and will need a recompile,
-but hopefully not for long. 
+A sample config file can be found at doc/sample.cfg. Currently all of the 
+other parameters are hard-coded and will need a recompile.
 
 Coattails ridden:
 
@@ -13,9 +13,9 @@ Various @ FractalForums.com
 
 To-do:
 
-- Ambient occlusion
-- Specify properties via config file (camera position/direction, iterations, 
-min-depth of DE, etc)
+- Add light position to config file
+- Get fog back in
 - Multi-threading
 - Speed optimisations
 - Raspberry Pi support (haha only serious)
+- AA and depth of field?
