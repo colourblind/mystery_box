@@ -75,11 +75,21 @@ vec3 vec_rotate(vec3 a, vec3 forward)
     vec3 r;
     vec3 up, side;
 
-    up.x = 0;
-    up.y = 1;
-    up.z = 0;
-
     forward = vec_norm(forward);
+
+    if (forward.x == 0 && (forward.y == 1 || forward.y == -1) && forward.z == 0)
+    {
+        up.x = 0;
+        up.y = 0;
+        up.z = 1;
+    }
+    else
+    {
+        up.x = 0;
+        up.y = 1;
+        up.z = 0;
+    }
+
     side = vec_cross(up, forward);
     up = vec_cross(side, forward);
 
