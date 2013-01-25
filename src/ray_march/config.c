@@ -18,6 +18,8 @@ void handle(char *key, char *value, config *c)
 		sscanf(value, "%d", &(c->height));
     else if (strcmp(key, "fov") == 0)
         sscanf(value, "%f", &(c->fov));
+    else if (strcmp(key, "normal_diff") == 0)
+        sscanf(value, "%f", &(c->normal_diff));
 }
 
 int load_config(char *filename, config *c)

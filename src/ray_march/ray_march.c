@@ -34,7 +34,7 @@ void save(float **data, int width, int height, float min_depth, float max_depth)
 
 float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
 {
-    const float MIN_DISTANCE = 0.0005f;
+    const float MIN_DISTANCE = 0.00025f;
     const float MAX_DISTANCE = 30; // TODO: dynamic, based on camera position
     float march = 0, distance;
     vec3 pos;
@@ -57,19 +57,18 @@ float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
 
 float colour(config c, vec3 position, float (*objectFunc)(config, vec3))
 {
-    const float TAP_OFFSET = 0.025f;
     const float ambient_scale = 0.1f;
     vec3 light_pos = { 9, 3, 2 };
     vec3 light_dir = vec_norm(vec_sub(light_pos, position));
     vec3 ao_sample_pos;
     float diffuse = 0, ambient;
 
-    float x0 = objectFunc(c, vec_add_c(position, -TAP_OFFSET, 0, 0));
-    float x1 = objectFunc(c, vec_add_c(position, TAP_OFFSET, 0, 0));
-    float y0 = objectFunc(c, vec_add_c(position, 0, -TAP_OFFSET, 0));
-    float y1 = objectFunc(c, vec_add_c(position, 0, TAP_OFFSET, 0));
-    float z0 = objectFunc(c, vec_add_c(position, 0, 0, -TAP_OFFSET));
-    float z1 = objectFunc(c, vec_add_c(position, 0, 0, TAP_OFFSET));
+    float x0 = objectFunc(c, vec_add_c(position, -c.normal_diff, 0, 0));
+    float x1 = objectFunc(c, vec_add_c(position, c.normal_diff, 0, 0));
+    float y0 = objectFunc(c, vec_add_c(position, 0, -c.normal_diff, 0));
+    float y1 = objectFunc(c, vec_add_c(position, 0, c.normal_diff, 0));
+    float z0 = objectFunc(c, vec_add_c(position, 0, 0, -c.normal_diff));
+    float z1 = objectFunc(c, vec_add_c(position, 0, 0, c.normal_diff));
     
     vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
 
@@ -217,6 +216,7 @@ int main(int argc, char **argv)
     c.camera_target.z = 0;
     c.fov = 90;
     c.height = 480;
+    c.normal_diff = 0.005f;
     c.scale = 2;
     c.width = 640;
 

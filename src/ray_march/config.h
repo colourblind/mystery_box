@@ -12,6 +12,7 @@ typedef struct
 	int width;
 	int height;
     float fov;
+    float normal_diff;
 } config;
 
 int load_config(char *filename, config *c);
