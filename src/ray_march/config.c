@@ -20,6 +20,8 @@ void handle(char *key, char *value, config *c)
         sscanf(value, "%f", &(c->fov));
     else if (strcmp(key, "normal_diff") == 0)
         sscanf(value, "%f", &(c->normal_diff));
+    else if (strcmp(key, "light_pos") == 0)
+        sscanf(value, "%f %f %f", &(c->light_pos.x), &(c->light_pos.y), &(c->light_pos.z));
 }
 
 int load_config(char *filename, config *c)
@@ -28,7 +30,6 @@ int load_config(char *filename, config *c)
     char key[1024], value[1024];
     char *split;
     FILE *f = fopen(filename, "r");
-    int i;
     
     if (!f)
         return 0;

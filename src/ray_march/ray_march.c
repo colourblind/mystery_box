@@ -58,8 +58,7 @@ float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
 float colour(config c, vec3 position, float (*objectFunc)(config, vec3))
 {
     const float ambient_scale = 0.1f;
-    vec3 light_pos = { 9, 3, 2 };
-    vec3 light_dir = vec_norm(vec_sub(light_pos, position));
+    vec3 light_dir = vec_norm(vec_sub(c.light_pos, position));
     vec3 ao_sample_pos;
     float diffuse = 0, ambient;
 
@@ -219,6 +218,9 @@ int main(int argc, char **argv)
     c.normal_diff = 0.005f;
     c.scale = 2;
     c.width = 640;
+    c.light_pos.x = 9;
+    c.light_pos.y = 3;
+    c.light_pos.z = 2;
 
     if (argc > 1)
         load_config(argv[1], &c);
