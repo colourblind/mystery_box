@@ -14,6 +14,7 @@ typedef struct
     float fov;
     float normal_diff;
     vec3 light_pos;
+    char output_file[256];
 } config;
 
 int load_config(char *filename, config *c);

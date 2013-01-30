@@ -22,6 +22,8 @@ void handle(char *key, char *value, config *c)
         sscanf(value, "%f", &(c->normal_diff));
     else if (strcmp(key, "light_pos") == 0)
         sscanf(value, "%f %f %f", &(c->light_pos.x), &(c->light_pos.y), &(c->light_pos.z));
+    else if (strcmp(key, "output_file") == 0)
+        sscanf(value, "%256s", &(c->output_file));
 }
 
 int load_config(char *filename, config *c)
