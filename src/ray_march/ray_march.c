@@ -62,12 +62,12 @@ float colour(config c, vec3 position, float (*objectFunc)(config, vec3))
     vec3 ao_sample_pos;
     float diffuse = 0, ambient;
 
-    float x0 = objectFunc(c, vec_add_c(position, -c.normal_diff, 0, 0));
-    float x1 = objectFunc(c, vec_add_c(position, c.normal_diff, 0, 0));
-    float y0 = objectFunc(c, vec_add_c(position, 0, -c.normal_diff, 0));
-    float y1 = objectFunc(c, vec_add_c(position, 0, c.normal_diff, 0));
-    float z0 = objectFunc(c, vec_add_c(position, 0, 0, -c.normal_diff));
-    float z1 = objectFunc(c, vec_add_c(position, 0, 0, c.normal_diff));
+    float x0 = objectFunc(c, vec_add_c(position, -c.normal_diff.x, 0, 0));
+    float x1 = objectFunc(c, vec_add_c(position, c.normal_diff.x, 0, 0));
+    float y0 = objectFunc(c, vec_add_c(position, 0, -c.normal_diff.y, 0));
+    float y1 = objectFunc(c, vec_add_c(position, 0, c.normal_diff.y, 0));
+    float z0 = objectFunc(c, vec_add_c(position, 0, 0, -c.normal_diff.z));
+    float z1 = objectFunc(c, vec_add_c(position, 0, 0, c.normal_diff.z));
     
     vec3 normal = { x1 - x0, y1 - y0, z1 - z0 };
 
@@ -126,9 +126,22 @@ void go(config c, float (*objectFunc)(config c, vec3))
             result = march(c, c.camera_pos, ray_dir, objectFunc);
             if (result > 0)
             {
-			    min_depth = result < min_depth ? result : min_depth;
-			    max_depth = result > max_depth ? result : max_depth;
-                depth[x][y] = colour(c, vec_add(c.camera_pos, vec_mult(ray_dir, result)), objectFunc);
+                vec3 pos = vec_add(c.camera_pos, vec_mult(ray_dir, result));
+                min_depth = result < min_depth ? result : min_depth;
+                max_depth = result > max_depth ? result : max_depth;
+                c.normal_diff.x = tanf(((x + 0.5f - half_width) / half_width) * half_fov_h);
+                c.normal_diff.y = tanf(((y + 0.5f - half_height) / half_height) * half_fov_v);
+                c.normal_diff.z = 1;
+                c.normal_diff = vec_norm(vec_rotate(c.normal_diff, camera_dir));
+                c.normal_diff = vec_sub(vec_mult(c.normal_diff, result), vec_mult(ray_dir, result));
+                c.normal_diff.z = c.normal_diff.x;
+                //c.normal_diff.x = 0.025f;
+                //c.normal_diff.y = 0.025f;
+                //c.normal_diff.z = 0.025f;
+                c.normal_diff.x = absf(c.normal_diff.x);
+                c.normal_diff.y = absf(c.normal_diff.y);
+                c.normal_diff.z = absf(c.normal_diff.z);
+                depth[x][y] = colour(c, pos, objectFunc);
             }
         }
 		printf(".");
@@ -215,7 +228,6 @@ int main(int argc, char **argv)
     c.camera_target.z = 0;
     c.fov = 90;
     c.height = 480;
-    c.normal_diff = 0.005f;
     c.scale = 2;
     c.width = 640;
     c.light_pos.x = 9;

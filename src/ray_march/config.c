@@ -18,8 +18,6 @@ void handle(char *key, char *value, config *c)
 		sscanf(value, "%d", &(c->height));
     else if (strcmp(key, "fov") == 0)
         sscanf(value, "%f", &(c->fov));
-    else if (strcmp(key, "normal_diff") == 0)
-        sscanf(value, "%f", &(c->normal_diff));
     else if (strcmp(key, "light_pos") == 0)
         sscanf(value, "%f %f %f", &(c->light_pos.x), &(c->light_pos.y), &(c->light_pos.z));
     else if (strcmp(key, "output_file") == 0)
