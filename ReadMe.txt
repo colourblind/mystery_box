@@ -13,7 +13,6 @@ Various @ FractalForums.com
 
 To-do:
 
-- Add light position to config file
 - Get fog back in
 - Multi-threading
 - Speed optimisations
