@@ -13,9 +13,8 @@ Various @ FractalForums.com
 
 To-do:
 
-- Add light position to config file
+- Tidy up Raspberry Pi support
 - Get fog back in
 - Multi-threading
 - Speed optimisations
-- Raspberry Pi support (haha only serious)
 - AA and depth of field?
