@@ -145,6 +145,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
             }
         }
 		printf(".");
+        fflush(stdout);
     }
 
 	time(&end);
