@@ -2,7 +2,7 @@ A volume ray-marcher for rendering Mandelboxen.
 
 ray_march [CONFIG_FILE] [WIDTH] [HEIGHT]
 
-A sample config file can be found at doc/sample.cfg. Currently all of the 
+A sample config file can be found in the docs directory. Currently all of the 
 other parameters are hard-coded and will need a recompile.
 
 Coattails ridden:

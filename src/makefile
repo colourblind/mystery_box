@@ -5,10 +5,10 @@ LIBS = -lz -lpng14
 default : ray_march
 
 %.o : %.c $(HEADERS)
-	gcc -c $< -I../../lib -o $@
+	gcc -c $< -I../lib -o $@
 
 ray_march : $(OBJECTS)
-	gcc $(OBJECTS) -o $@ -L../../lib/rpi -lm $(LIBS)
+	gcc $(OBJECTS) -o $@ -L../lib/rpi -lm $(LIBS)
 
 clean :
 	-rm -f $(OBJECTS)
