@@ -10,6 +10,7 @@ output_dir = 'anim'
 
 def go():
     track = camera_path.Pather(points, directions, times)
+    execute_line = os.path.join('.', 'ray_march') + ' go.cfg'
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     t = 0
@@ -23,7 +24,7 @@ def go():
         f.write(template.format(camera_pos, camera_target, filename))
         f.flush()
         f.close
-        os.system('ray_march go.cfg')
+        os.system(execute_line)
     
 template = """scale: 2.5
 camera_pos: {0}
