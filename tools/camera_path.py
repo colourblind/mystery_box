@@ -50,7 +50,7 @@ class Pather(object):
             segment_time = float(time - self.times[i - 1]) / (self.times[i] - self.times[i - 1])
         
         p = self._interpolate(self.points, i, segment_time)
-        d = self._interpolate(self.directions, i, segment_time).normalised()
+        d = self._interpolate(self.directions, i, segment_time) #.normalised()
             
         return (p.get_tuple(), d.get_tuple())
         
