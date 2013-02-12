@@ -4,10 +4,17 @@ import json
 import camera_path
 
 def go(c):
+    template = config_template
     track = camera_path.Pather(c['key_frames'])
     execute_line = os.path.join('.', 'ray_march') + ' go.cfg'
     if not os.path.exists(c['output_dir']):
         os.mkdir(c['output_dir'])
+    renderer = c['renderer']
+    template = template.replace('{scale}', str(renderer['scale']))
+    template = template.replace('{light_pos}', str(renderer['light_pos']))
+    template = template.replace('{bailout}', str(renderer['bailout']))
+    template = template.replace('{width}', str(renderer['width']))
+    template = template.replace('{height}', str(renderer['height']))
     t = 0
     for i in xrange(int(c['key_frames'][-1]['time'] * c['fps'])):
         t = float(i) / c['fps']
@@ -15,20 +22,24 @@ def go(c):
         camera_pos = '{0} {1} {2}'.format(camera[0][0], camera[0][1], camera[0][2])
         camera_target = '{0} {1} {2}'.format(camera[1][0], camera[1][1], camera[1][2])
         filename = os.path.join(c['output_dir'], str(i))
+        frame = template.replace('{camera_pos}', camera_pos)
+        frame = frame.replace('{camera_target}', camera_target)
+        frame = frame.replace('{output_file}', filename)
         f = open('go.cfg', 'w')
-        f.write(template.format(camera_pos, camera_target, filename))
+        f.write(frame)
         f.flush()
         f.close
         os.system(execute_line)
-    
-template = """scale: 2.5
-camera_pos: {0}
-camera_target: {1}
-light_pos: 9 3 2
-output_file: {2}.png
-width: 320
-height: 240
-bailout: 8
+
+config_template = """scale: {scale}
+camera_pos: {camera_pos}
+camera_target: {camera_target}
+light_pos: {light_pos}
+output_file: {output_file}.png
+width: {width}
+height: {height}
+bailout: {bailout}
+fov: 90
 """
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 {
-    "output_dir": "animx2",
+    "output_dir": "test_anim",
     "fps": 12,
     "key_frames":
     [
@@ -9,12 +9,12 @@
             "target": [ 3.5, 2.65, 6.0 ]
         },
         {
-            "time": 2,
+            "time": 3,
             "position": [ 3.5, 2.65, 3.8 ],
             "target": [ 3.5, 2.65, 6.0 ]
         },
         {
-            "time": 6,
+            "time": 4,
             "position": [ 3.5, 2.75, 3.5 ],
             "target": [ 0.0, 0.5, 0.0 ]
         },
@@ -24,34 +24,42 @@
             "target": [ 0, 0.5, 0 ]
         },
         {
-            "time": 10,
+            "time": 13,
             "position": [ 0.5, 2.8, 3.8 ],
             "target": [ -1, 2.4, -4.0 ]
         },
         {
-            "time": 12,
+            "time": 16,
             "position": [ 0.65, 2.75, 0.0 ],
             "target": [ -6, 2.4, -2 ]
         },
         {
-            "time": 14,
+            "time": 20,
             "position": [ 0.65, 2.7, -5.0 ],
             "target": [ -4.0, 2.8, -5.0 ]
         },
         {
-            "time": 18,
+            "time": 23,
             "position": [ 5, -4.25, -5 ],
             "target": [ 0, 0, 0 ]
         },
         {
-            "time": 20,
+            "time": 28,
             "position": [ 9, 4, 5 ],
             "target": [ 0, -0.75, 0 ]
         },
         {
-            "time": 22,
+            "time": 30,
             "position": [ 10, 4, 10 ],
             "target": [ 0, -0.75, 0 ]
         }
-    ]
+    ],
+    "renderer":
+    {
+        "scale": 2.5,
+        "light_pos": "9 3 2",
+        "bailout": 8,
+        "width": 320,
+        "height": 240
+    }
 }
