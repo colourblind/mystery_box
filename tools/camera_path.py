@@ -30,10 +30,10 @@ class Vector(object):
         
 
 class Pather(object):
-    def __init__(self, points, directions, times):
-        self.points = [Vector(v) for v in points]
-        self.directions = [Vector(v) for v in directions]
-        self.times = times
+    def __init__(self, key_frames):
+        self.points = [Vector(f['position']) for f in key_frames]
+        self.directions = [Vector(f['target']) for f in key_frames]
+        self.times = [f['time'] for f in key_frames]
         #self._interpolate = self._linear
         self._interpolate = self._cubic
 
@@ -89,21 +89,3 @@ class Pather(object):
 
         return n0 * a * a2 + n1 * a2 + n2 * a + n3;
         
-        
-if __name__ == '__main__':
-    points = [(0, 0, 0), (1, 1, 0), (2, 4, 0), (-5, -5, 0)]
-    directions = [(1, 0, 0), (0, 1, 0), (0, 0, -1), (-1, -1, 0)]
-    times = [0, 10, 30, 60]
-    pather = Pather(points, directions, times)
-    
-    for x in range(91):
-        t = float(x) / 90 * 60
-        p = pather.get(t)
-        print('{{ x: {0}, y: {1} }}, // {2}'.format(p[0][0], p[0][1], t))
-        
-    #print('0  : {0}'.format(pather.get(0)))
-    #print('5  : {0}'.format(pather.get(5)))
-    #print('10 : {0}'.format(pather.get(10)))
-    #print('20 : {0}'.format(pather.get(20)))
-    #print('30 : {0}'.format(pather.get(30)))
-    #print('60 : {0}'.format(pather.get(60)))
