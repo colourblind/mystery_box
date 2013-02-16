@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import threading
 import json
 import anim
@@ -68,5 +69,9 @@ if __name__ == '__main__':
     
     for i in xrange(THREAD_COUNT):
         thread = threading.Thread(name=str(i), target=go, args=(i, c, track, template, dispatcher,))
+        thread.daemon = True
         thread.start()
+        
+    while True:
+        time.sleep(100)
   
