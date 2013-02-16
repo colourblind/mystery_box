@@ -15,6 +15,7 @@ vec3 vec_norm(vec3 a);
 float vec_dot(vec3 a, vec3 b);
 vec3 vec_cross(vec3 a, vec3 b);
 vec3 vec_rotate(vec3 a, vec3 forward);
+vec3 vec_abs(vec3 a);
 
 float absf(float a);
 

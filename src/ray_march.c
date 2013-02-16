@@ -96,7 +96,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
     float half_fov_v = DEGS_TO_RADS((c.fov / 2) * ((float)c.height / c.width));
     float half_width = (float)c.width / 2;
     float half_height = (float)c.height / 2;
-    vec3 camera_dir, ray_dir;
+    vec3 camera_dir, ray_dir, ray_dir_screen;
 	float min_depth = 100000000;
 	float max_depth = 0;
     float result;
@@ -118,10 +118,11 @@ void go(config c, float (*objectFunc)(config c, vec3))
         {
             depth[x][y] = -1;
             // Generate dir vector
-            ray_dir.x = tanf(((x - half_width) / half_width) * half_fov_h);
-            ray_dir.y = tanf(((y - half_height) / half_height) * half_fov_v);
-            ray_dir.z = 1;
-            ray_dir = vec_norm(vec_rotate(ray_dir, camera_dir));
+            ray_dir_screen.x = tanf(((x - half_width) / half_width) * half_fov_h);
+            ray_dir_screen.y = tanf(((y - half_height) / half_height) * half_fov_v);
+            ray_dir_screen.z = 1;
+			// Align to camera
+            ray_dir = vec_norm(vec_rotate(ray_dir_screen, camera_dir));
             // Ten hut!
             result = march(c, c.camera_pos, ray_dir, objectFunc);
             if (result > 0)
@@ -129,18 +130,16 @@ void go(config c, float (*objectFunc)(config c, vec3))
                 vec3 pos = vec_add(c.camera_pos, vec_mult(ray_dir, result));
                 min_depth = result < min_depth ? result : min_depth;
                 max_depth = result > max_depth ? result : max_depth;
+				// Generate ray for half-pixel
                 c.normal_diff.x = tanf(((x + 0.5f - half_width) / half_width) * half_fov_h);
                 c.normal_diff.y = tanf(((y + 0.5f - half_height) / half_height) * half_fov_v);
                 c.normal_diff.z = 1;
-                c.normal_diff = vec_norm(vec_rotate(c.normal_diff, camera_dir));
-                c.normal_diff = vec_sub(vec_mult(c.normal_diff, result), vec_mult(ray_dir, result));
+				// Calculate offset from hit point
+                c.normal_diff = vec_sub(vec_mult(c.normal_diff, result), vec_mult(ray_dir_screen, result));
                 c.normal_diff.z = c.normal_diff.x;
-                //c.normal_diff.x = 0.025f;
-                //c.normal_diff.y = 0.025f;
-                //c.normal_diff.z = 0.025f;
-                c.normal_diff.x = absf(c.normal_diff.x);
-                c.normal_diff.y = absf(c.normal_diff.y);
-                c.normal_diff.z = absf(c.normal_diff.z);
+				// Make sure the offsets are positive
+				c.normal_diff = vec_abs(c.normal_diff);
+
                 depth[x][y] = colour(c, pos, objectFunc);
             }
         }

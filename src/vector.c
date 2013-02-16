@@ -103,6 +103,15 @@ vec3 vec_rotate(vec3 a, vec3 forward)
     return r;
 }
 
+vec3 vec_abs(vec3 a)
+{
+    vec3 r;
+    r.x = absf(a.x);
+    r.y = absf(a.y);
+    r.z = absf(a.z);
+    return r;
+}
+
 float absf(float a)
 {
     return a < 0 ? -a : a;
