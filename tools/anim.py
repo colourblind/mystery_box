@@ -15,8 +15,11 @@ def go(c):
     template = template.replace('{bailout}', str(renderer['bailout']))
     template = template.replace('{width}', str(renderer['width']))
     template = template.replace('{height}', str(renderer['height']))
-    t = 0
-    for i in xrange(int(c['key_frames'][-1]['time'] * c['fps'])):
+    if len(sys.argv) > 2:
+        start = int(sys.argv[2])
+    else:
+        start = 0
+    for i in xrange(start, int(c['key_frames'][-1]['time'] * c['fps'])):
         t = float(i) / c['fps']
         camera = track.get(t)
         camera_pos = '{0} {1} {2}'.format(camera[0][0], camera[0][1], camera[0][2])
