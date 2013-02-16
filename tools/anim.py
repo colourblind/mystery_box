@@ -3,10 +3,22 @@ import sys
 import json
 import camera_path
 
+def render(camera, template, config_filename, filename):
+    camera_pos = '{0} {1} {2}'.format(camera[0][0], camera[0][1], camera[0][2])
+    camera_target = '{0} {1} {2}'.format(camera[1][0], camera[1][1], camera[1][2])
+    frame_config = template.replace('{camera_pos}', camera_pos)
+    frame_config = frame_config.replace('{camera_target}', camera_target)
+    frame_config = frame_config.replace('{output_file}', filename)
+    f = open(config_filename, 'w')
+    f.write(frame_config)
+    f.flush()
+    f.close()
+    execute_line = os.path.join('.', 'ray_march') + ' ' + config_filename + ' > nul'
+    os.system(execute_line)
+        
 def go(c):
     template = config_template
     track = camera_path.Pather(c['key_frames'])
-    execute_line = os.path.join('.', 'ray_march') + ' go.cfg'
     if not os.path.exists(c['output_dir']):
         os.mkdir(c['output_dir'])
     renderer = c['renderer']
@@ -22,17 +34,8 @@ def go(c):
     for i in xrange(start, int(c['key_frames'][-1]['time'] * c['fps'])):
         t = float(i) / c['fps']
         camera = track.get(t)
-        camera_pos = '{0} {1} {2}'.format(camera[0][0], camera[0][1], camera[0][2])
-        camera_target = '{0} {1} {2}'.format(camera[1][0], camera[1][1], camera[1][2])
         filename = os.path.join(c['output_dir'], str(i))
-        frame = template.replace('{camera_pos}', camera_pos)
-        frame = frame.replace('{camera_target}', camera_target)
-        frame = frame.replace('{output_file}', filename)
-        f = open('go.cfg', 'w')
-        f.write(frame)
-        f.flush()
-        f.close
-        os.system(execute_line)
+        render(camera, template, 'go.cfg', filename)
 
 config_template = """scale: {scale}
 camera_pos: {camera_pos}
