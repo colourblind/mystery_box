@@ -72,6 +72,6 @@ if __name__ == '__main__':
         thread.daemon = True
         thread.start()
         
-    while True:
-        time.sleep(100)
+    while threading.active_count() > 1:
+        time.sleep(5)
   
