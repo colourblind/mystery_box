@@ -33,10 +33,11 @@ class Dispatcher(object):
             self.next_frame = self.next_frame + 1
             self.lock.release()
             
-            frame_config = self.config['renderer']
+            frame_config = self.config['renderer'].copy()
             t = float(frame_no) / self.config['fps']
             camera = self.track.get(t)
-            filename = os.path.join(c['output_dir'], str(frame_no) + '.png')
+            filename = os.path.join(self.config['output_dir'], str(frame_no) + '.png')
+
             frame_config['camera_pos'] = '{0} {1} {2}'.format(camera[0][0], camera[0][1], camera[0][2])
             frame_config['camera_target'] = '{0} {1} {2}'.format(camera[1][0], camera[1][1], camera[1][2])
             frame_config['output_file'] = filename
