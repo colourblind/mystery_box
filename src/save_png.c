@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "png.h"
+#include "config.h"
 
 int save_png(char *filename, unsigned char *data, int width, int height)
 {
@@ -50,4 +51,26 @@ int save_png(char *filename, unsigned char *data, int width, int height)
     fclose(file);
 
     return 0;
+}
+
+void save(float **data, config c, float min_depth, float max_depth)
+{
+	int i, j;
+	unsigned char *d = malloc(c.width * c.height * sizeof(unsigned char));
+
+    memset(d, 0, c.width * c.height * sizeof(unsigned char));
+	for (i = 0; i < c.width; i ++)
+	{
+		for (j = 0; j < c.height; j ++)
+		{
+			if (data[i][j] >= 0)
+			{
+                d[j * c.width + i] = (unsigned char)(data[i][j] * 255);
+			}
+		}
+	}
+
+	save_png(c.output_file, d, c.width, c.height);
+
+	free(d);
 }

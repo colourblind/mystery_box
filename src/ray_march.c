@@ -4,33 +4,10 @@
 #include <time.h>
 #include "vector.h"
 #include "config.h"
+#include "save_png.h"
 
 #define DEGS_TO_RADS(t)		((t) / 180.0f * 3.141592654f)
 #define CLAMP(t, mint, maxt)	(t < mint ? mint : (t > maxt ? maxt : t))
-
-int save_png(char *filename, unsigned char *data, int width, int height);
-
-void save(float **data, config c, float min_depth, float max_depth)
-{
-	int i, j;
-	unsigned char *d = malloc(c.width * c.height * sizeof(unsigned char));
-
-    memset(d, 0, c.width * c.height * sizeof(unsigned char));
-	for (i = 0; i < c.width; i ++)
-	{
-		for (j = 0; j < c.height; j ++)
-		{
-			if (data[i][j] >= 0)
-			{
-                d[j * c.width + i] = (unsigned char)(data[i][j] * 255);
-			}
-		}
-	}
-
-	save_png(c.output_file, d, c.width, c.height);
-
-	free(d);
-}
 
 float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
 {

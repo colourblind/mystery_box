@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\save_png.h"
+				>
+			</File>
+			<File
 				RelativePath=".\vector.h"
 				>
 			</File>
