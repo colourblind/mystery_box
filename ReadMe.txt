@@ -13,8 +13,8 @@ Various @ FractalForums.com
 
 To-do:
 
+- OpenCL renderer
 - Tidy up Raspberry Pi support
 - Get fog back in
-- Multi-threading
 - Speed optimisations
 - AA and depth of field?

@@ -1,5 +1,5 @@
-HEADERS = save_png.h vector.h config.h
-OBJECTS = ray_march.o save_png.o config.o vector.o
+HEADERS = ray_march.h save_png.h vector.h config.h
+OBJECTS = main.o ray_march.o save_png.o config.o vector.o
 LIBS = -lz -lpng14
 
 default : ray_march

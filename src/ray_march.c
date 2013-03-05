@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #include "vector.h"
 #include "config.h"
 #include "save_png.h"
@@ -16,15 +15,13 @@ float march(config c, vec3 start, vec3 dir, float (*objectFunc)(config, vec3))
     float march = 0, distance;
     vec3 pos;
 
-    while(1)
+    while(march < MAX_DISTANCE)
     {
         pos = vec_add(start, vec_mult(dir, march));
 
         distance = objectFunc(c, pos);
         if (distance < MIN_DISTANCE)
             return march;
-        if (march > MAX_DISTANCE)
-            break;
     
         march += distance;
     }
@@ -77,15 +74,12 @@ void go(config c, float (*objectFunc)(config c, vec3))
 	float min_depth = 100000000;
 	float max_depth = 0;
     float result;
-	time_t start, end;
 
     // Init depth array
     depth = (float *)malloc(c.width * c.height * sizeof(float));
 
     camera_dir = vec_norm(vec_sub(c.camera_target, c.camera_pos));
 
-	time(&start);
-        
     // Iterate over pixels
     for (x = 0; x < c.width; x ++)
     {
@@ -122,9 +116,6 @@ void go(config c, float (*objectFunc)(config c, vec3))
         fflush(stdout);
     }
 
-	time(&end);
-	printf("\nTime taken: %.2lf\n", difftime(end, start));
-
 	save(depth, c, min_depth, max_depth);
 
     // Tear down array
@@ -133,10 +124,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
 
 vec3 iterate(config c, vec3 v, vec3 z, float *dz)
 {
-    float m;
-    float rmin = 0.5f;
-    float rfix = 1;
-    
+    float m;    
 
     // Box fold
     if (v.x > 1)
@@ -187,31 +175,4 @@ float inside(config c, vec3 z)
         v = iterate(c, v, z, &dr);
     
     return vec_length(v) / absf(dr) - lolwut;
-}
-
-int main(int argc, char **argv)
-{
-    config c;
-    c.bailout = 15;
-    c.camera_pos.x = 15;
-    c.camera_pos.y = 3;
-    c.camera_pos.z = 15;
-    c.camera_target.x = 0;
-    c.camera_target.y = 0;
-    c.camera_target.z = 0;
-    c.fov = 90;
-    c.height = 480;
-    c.scale = 2;
-    c.width = 640;
-    c.light_pos.x = 9;
-    c.light_pos.y = 3;
-    c.light_pos.z = 2;
-    strcpy(c.output_file, "out.png");
-
-    if (argc > 1)
-        load_config(argv[1], &c);
-    c.width = argc > 2 ? atoi(argv[2]) : c.width;
-    c.height = argc > 3 ? atoi(argv[3]) : c.height;
-
-	go(c, &inside);
 }

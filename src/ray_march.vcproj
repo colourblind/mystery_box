@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\main.c"
+				>
+			</File>
+			<File
 				RelativePath=".\ray_march.c"
 				>
 			</File>
@@ -203,6 +207,10 @@
 			>
 			<File
 				RelativePath=".\config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ray_march.h"
 				>
 			</File>
 			<File
