@@ -68,7 +68,7 @@ float colour(config c, vec3 position, float (*objectFunc)(config, vec3))
 void go(config c, float (*objectFunc)(config c, vec3))
 {
     int x, y;
-    float **depth;
+    float *depth;
     float half_fov_h = DEGS_TO_RADS(c.fov / 2);
     float half_fov_v = DEGS_TO_RADS((c.fov / 2) * ((float)c.height / c.width));
     float half_width = (float)c.width / 2;
@@ -80,9 +80,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
 	time_t start, end;
 
     // Init depth array
-    depth = (float **)malloc(c.width * sizeof(float));
-    for (x = 0; x < c.width; x ++)
-        depth[x] = (float *)malloc(c.height * sizeof(float));
+    depth = (float *)malloc(c.width * c.height * sizeof(float));
 
     camera_dir = vec_norm(vec_sub(c.camera_target, c.camera_pos));
 
@@ -93,7 +91,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
     {
         for (y = 0; y < c.height; y ++)
         {
-            depth[x][y] = -1;
+            depth[y * c.width + x] = -1;
             // Generate dir vector
             ray_dir_screen.x = tanf(((x - half_width) / half_width) * half_fov_h);
             ray_dir_screen.y = tanf(((y - half_height) / half_height) * half_fov_v);
@@ -117,7 +115,7 @@ void go(config c, float (*objectFunc)(config c, vec3))
 				// Make sure the offsets are positive
 				c.normal_diff = vec_abs(c.normal_diff);
 
-                depth[x][y] = colour(c, pos, objectFunc);
+                depth[y * c.width + x] = colour(c, pos, objectFunc);
             }
         }
 		printf(".");
@@ -130,8 +128,6 @@ void go(config c, float (*objectFunc)(config c, vec3))
 	save(depth, c, min_depth, max_depth);
 
     // Tear down array
-    for (x = 0; x < c.width; x++)
-        free(depth[x]);
     free(depth);
 }
 
