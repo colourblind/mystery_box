@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="zlib.lib libpng.lib OpenCL.lib"
 				OutputFile="$(OutDir)\$(ProjectName)_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)..\lib\win32"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="zlib.lib libpng.lib OpenCL.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)..\lib\win32"
 				GenerateDebugInformation="true"
@@ -180,6 +180,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\cl_utils.c"
+				>
+			</File>
+			<File
 				RelativePath=".\config.c"
 				>
 			</File>
@@ -189,6 +193,10 @@
 			</File>
 			<File
 				RelativePath=".\ray_march.c"
+				>
+			</File>
+			<File
+				RelativePath=".\ray_march_cl.c"
 				>
 			</File>
 			<File
@@ -205,6 +213,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\cl_utils.h"
+				>
+			</File>
 			<File
 				RelativePath=".\config.h"
 				>
