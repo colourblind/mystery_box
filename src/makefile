@@ -1,4 +1,4 @@
-HEADERS = vector.h config.h
+HEADERS = save_png.h vector.h config.h
 OBJECTS = ray_march.o save_png.o config.o vector.o
 LIBS = -lz -lpng14
 
