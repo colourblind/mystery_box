@@ -6,4 +6,6 @@
 void go(config c, float (*objectFunc)(config c, vec3));
 float inside(config c, vec3 z);
 
+void go_cl(config c);
+
 #endif // MYSTERYBOX_RAY_MARCH_H
