@@ -23,6 +23,7 @@ void go_cl(config c)
         c.camera_target.y - c.camera_pos.y, 
         c.camera_target.z - c.camera_pos.z, 
         0 };
+    cl_float4 light_pos = { c.light_pos.x, c.light_pos.y, c.light_pos.z, 0 };
 
     sprintf(buf, "-DBAILOUT=%d -DSCALE=%f -DFOV=%f", c.bailout, c.scale, c.fov);
 
@@ -42,6 +43,7 @@ void go_cl(config c)
     error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem);
     error = clSetKernelArg(kernel, 1, sizeof(cl_float4), &camera_pos);
     error = clSetKernelArg(kernel, 2, sizeof(cl_float4), &camera_dir);
+    error = clSetKernelArg(kernel, 3, sizeof(cl_float4), &light_pos);
 
     clFinish(commands);
 

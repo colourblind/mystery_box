@@ -3,6 +3,7 @@
  * BAILOUT
  * SCALE
  * FOV
+ * LIGHT_POS
  */
 
 float mandelbox(float4 z)
@@ -105,16 +106,15 @@ float go(float4 start, float4 dir)
     return -1;
 }
 
-float colour(float4 position)
+float colour(float4 position, float4 offset, float4 light_pos)
 {
     const float ambient_scale = 0.1f;
-    const float4 light_pos = { 9, 3.5, 4, 0 };
     float4 light_dir = normalize(light_pos - position);
     float4 ao_sample_pos;
     float diffuse = 0, ambient;
-    float4 offsetx = { 0.001, 0, 0, 0 };
-    float4 offsety = { 0, 0.001, 0, 0 };
-    float4 offsetz = { 0, 0, 0.001, 0 };
+    float4 offsetx = { offset.x, 0, 0, 0 };
+    float4 offsety = { 0, offset.y, 0, 0 };
+    float4 offsetz = { 0, 0, offset.z, 0 };
 
     float x0 = mandelbox(position - offsetx);
     float x1 = mandelbox(position + offsetx);
@@ -137,7 +137,7 @@ float colour(float4 position)
     return diffuse * (1 - ambient_scale) + ambient * ambient_scale;
 }
 
-__kernel void test(__global float *out, __const float4 camera_pos, __const float4 camera_dir)
+__kernel void test(__global float *out, __const float4 camera_pos, __const float4 camera_dir, __const float4 light_pos)
 {
     const int2 pos = { get_global_id(0), get_global_id(1) };
     const int2 dims = { get_global_size(0), get_global_size(1) };
@@ -147,6 +147,7 @@ __kernel void test(__global float *out, __const float4 camera_pos, __const float
     const float half_fov_v = radians((FOV / 2) * (convert_float(dims.y) / dims.x));
     float4 ray_dir_screen;
     float4 ray_dir;
+    float4 offset;
     float distance;
     
     ray_dir_screen.x = tan(((pos.x - half_width) / half_width) * half_fov_h);
@@ -156,8 +157,18 @@ __kernel void test(__global float *out, __const float4 camera_pos, __const float
     ray_dir = normalize(align_to_vector(ray_dir_screen, camera_dir));
 
     distance = go(camera_pos, ray_dir);
+
     if (distance >= 0)
-        out[pos.y * dims.x + pos.x] = colour(camera_pos + ray_dir * distance);
+    {
+        offset.x = tan(((pos.x + 0.5f - half_width) / half_width) * half_fov_h);
+        offset.y = tan(((pos.y + 0.5f - half_height) / half_height) * half_fov_v);
+        offset.z = 1;
+        offset = (offset * distance) - (ray_dir_screen * distance);
+        offset.z = offset.x;
+        offset = fabs(offset);
+
+        out[pos.y * dims.x + pos.x] = colour(camera_pos + ray_dir * distance, offset, light_pos);
+    }
     else
         out[pos.y * dims.x + pos.x] = distance;
 }
