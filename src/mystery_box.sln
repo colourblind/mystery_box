@@ -5,12 +5,18 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ray_march", "ray_march.vcpr
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_CL|Win32 = Debug_CL|Win32
 		Debug|Win32 = Debug|Win32
+		Release_CL|Win32 = Release_CL|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug_CL|Win32.ActiveCfg = Debug_CL|Win32
+		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug_CL|Win32.Build.0 = Debug_CL|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug|Win32.ActiveCfg = Debug|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Debug|Win32.Build.0 = Debug|Win32
+		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Release_CL|Win32.ActiveCfg = Release_CL|Win32
+		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Release_CL|Win32.Build.0 = Release_CL|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Release|Win32.ActiveCfg = Release|Win32
 		{072EAC61-D9A7-44AD-86FF-06ADC99C6096}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

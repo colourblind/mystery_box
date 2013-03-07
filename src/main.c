@@ -30,8 +30,12 @@ int main(int argc, char **argv)
     c.height = argc > 3 ? atoi(argv[3]) : c.height;
 
     time(&start);
-        
-    go(c, &inside);
+    
+    #ifdef MYSTERY_BOX_CL
+        go_cl(c);    
+    #else
+        go(c, &inside);
+    #endif
 
     time(&end);
     printf("\nTime taken: %.2lf\n", difftime(end, start));
