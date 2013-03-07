@@ -244,6 +244,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)*.cl $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -323,6 +324,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)*.cl $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
