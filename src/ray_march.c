@@ -165,7 +165,7 @@ vec3 iterate(config c, vec3 v, vec3 z, float *dz)
 
 float inside(config c, vec3 z)
 {
-    float lolwut = powf(2.f, 1 - c.bailout);
+    float lolwut = powf(2.f, 1.f - c.bailout);
     int i;
     vec3 v;
     float dr = 1.f;
