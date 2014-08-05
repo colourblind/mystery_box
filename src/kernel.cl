@@ -137,10 +137,10 @@ float colour(float4 position, float4 offset, float4 light_pos)
     return diffuse * (1 - ambient_scale) + ambient * ambient_scale;
 }
 
-__kernel void test(__global float *out, __const float4 camera_pos, __const float4 camera_dir, __const float4 light_pos)
+__kernel void test(__global float *out, __const float4 camera_pos, __const float4 camera_dir, __const float4 light_pos, __const int2 image_size)
 {
     const int2 pos = { get_global_id(0), get_global_id(1) };
-    const int2 dims = { get_global_size(0), get_global_size(1) };
+    const int2 dims = image_size;
     const float half_width = convert_float(dims.x) / 2;
     const float half_height = convert_float(dims.y) / 2;
     const float half_fov_h = radians(convert_float(FOV) / 2);
